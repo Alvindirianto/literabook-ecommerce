@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LiteraBook — Toko Buku Online Modern</title>
+  <!-- Tailwind CSS CDN untuk styling modern responsif -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f6f7f9',
+              100: '#ebedf2',
+              500: '#0f172a',
+              accent: '#059669',
+              gold: '#d97706'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-serif { font-family: 'Playfair Display', serif; }
+    .book-cover-shadow {
+      box-shadow: -6px 8px 18px -4px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-[#faf9f5] text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- TOP ANNOUNCEMENT BANNER -->
+  <div class="bg-slate-900 text-slate-300 text-xs py-2 px-4 text-center font-medium tracking-wide">
+    ✨ Diskon Spesial Pekan Literasi: Gratis Ongkir & Diskon 20% untuk semua buku fiksi!
+  </div>
+
+  <!-- NAVBAR -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- LOGO -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-md">
+          L
+        </div>
+        <div>
+          <span class="text-2xl font-bold tracking-tight text-slate-900 font-serif">Litera<span class="text-emerald-600">Book</span></span>
+          <span class="hidden sm:block text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Toko Buku Digital</span>
+        </div>
+      </div>
+
+      <!-- SEARCH BAR -->
+      <div class="flex-1 max-w-lg relative hidden md:block">
+        <input 
+          type="text" 
+          id="searchInput"
+          onkeyup="handleSearch()"
+          placeholder="Cari judul buku, penulis, atau ISBN..." 
+          class="w-full bg-slate-50 border border-slate-300 rounded-full py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+        >
+        <svg class="w-5 h-5 text-slate-400 absolute left-4 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+
+      <!-- RIGHT ACTIONS (ADMIN TOGGLE & CART) -->
+      <div class="flex items-center gap-3">
+        <!-- TOGGLE MODE ADMIN/USER -->
+        <button 
+          onclick="toggleAdminPanel()" 
+          class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 border border-slate-300"
+          title="Kelola Stok Buku"
+        >
+          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+          </svg>
+          <span class="hidden sm:inline">Mode Inventaris</span>
+        </button>
+
+        <!-- CART BUTTON -->
+        <button 
+          onclick="toggleCartDrawer()" 
+          class="relative bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 sm:px-4 sm:py-2.5 rounded-full flex items-center gap-2 font-medium text-sm transition shadow-sm"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+          <span class="hidden sm:inline">Keranjang</span>
+          <span id="cartCount" class="bg-amber-400 text-slate-900 font-bold text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MOBILE SEARCH INPUT -->
+    <div class="px-4 pb-3 md:hidden">
+      <div class="relative">
+        <input 
+          type="text" 
+          id="mobileSearchInput"
+          onkeyup="handleMobileSearch()"
+          placeholder="Cari judul buku atau penulis..." 
+          class="w-full bg-slate-50 border border-slate-300 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        >
+        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- HERO SECTION -->
+    <section class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 sm:p-10 text-white mb-10 shadow-lg relative overflow-hidden">
+      <div class="max-w-2xl relative z-10">
+        <span class="inline-block bg-emerald-500/20 text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-500/30 mb-4">
+          Kurasi Bacaan Terbaik
+        </span>
+        <h1 class="text-3xl sm:text-5xl font-serif font-bold leading-tight mb-4 text-balance">
+          Temukan Buku Favorit & Baca Bab Pertama Secara Gratis.
+        </h1>
+        <p class="text-slate-300 text-sm sm:text-base mb-6 leading-relaxed">
+          Platform toko buku online dengan alur checkout instan, dukungan pembayaran Stripe & PayPal yang aman, serta pembaruan ketersediaan stok real-time.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="#katalog" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-6 py-3 rounded-full text-sm transition shadow-md">
+            Jelajahi Katalog
+          </a>
+          <button onclick="filterCategory('Fiksi')" class="border border-slate-600 hover:bg-slate-700/50 text-white font-medium px-5 py-3 rounded-full text-sm transition">
+            Lihat Buku Terlaris
+          </button>
+        </div>
+      </div>
+      <!-- Background Graphic Effect -->
+      <div class="absolute -right-12 -bottom-12 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    </section>
+
+    <!-- SECTION TITLE & CATEGORY FILTER PILLS -->
+    <section id="katalog" class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-serif font-bold text-slate-900">Katalog Pilihan</h2>
+          <p class="text-xs text-slate-500">Pilih genre buku yang ingin Anda pelajari atau nikmati.</p>
+        </div>
+
+        <!-- CATEGORY PILLS -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-none" id="categoryButtons">
+          <button onclick="filterCategory('Semua')" class="cat-pill active px-4 py-1.5 text-xs font-semibold rounded-full bg-slate-900 text-white transition">Semua</button>
+          <button onclick="filterCategory('Fiksi')" class="cat-pill px-4 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">Fiksi</button>
+          <button onclick="filterCategory('Self-Help')" class="cat-pill px-4 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">Pengembangan Diri</button>
+          <button onclick="filterCategory('Bisnis')" class="cat-pill px-4 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">Bisnis & Finansial</button>
+          <button onclick="filterCategory('Teknologi')" class="cat-pill px-4 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">Teknologi</button>
+        </div>
+      </div>
+
+      <!-- BOOK GRID CONTAINER -->
+      <div id="bookGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <!-- Rendered by JavaScript -->
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div id="emptyState" class="hidden text-center py-16">
+        <p class="text-slate-400 text-sm">Buku yang Anda cari tidak ditemukan. Coba kata kunci lain.</p>
+      </div>
+    </section>
+
+    <!-- ADMIN INVENTORY DRAWER / MODAL -->
+    <section id="adminSection" class="hidden bg-white border border-slate-300 rounded-2xl p-6 mb-12 shadow-md">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
+        <div>
+          <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+            <span class="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></span>
+            Panel Pengelolaan Inventaris Toko
+          </h3>
+          <p class="text-xs text-slate-500">Ubah stok buku secara langsung untuk menguji sistem peringatan stok habis.</p>
+        </div>
+        <button onclick="toggleAdminPanel()" class="text-slate-400 hover:text-slate-600 text-sm font-semibold">Tutup ✕</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50 text-slate-600 uppercase font-semibold">
+            <tr>
+              <th class="py-3 px-3">Judul Buku</th>
+              <th class="py-3 px-3">Genre</th>
+              <th class="py-3 px-3">Harga</th>
+              <th class="py-3 px-3">Sisa Stok</th>
+              <th class="py-3 px-3">Status</th>
+              <th class="py-3 px-3 text-right">Aksi Kelola</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody" class="divide-y divide-slate-200">
+            <!-- Rendered by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-8 mt-auto text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-800 font-serif">LiteraBook</span> &copy; 2026. Seluruh hak cipta dilindungi.
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-1">🔒 Stripe Verified</span>
+        <span class="flex items-center gap-1">🅿️ PayPal Integrated</span>
+        <span>📦 Real-time Inventory</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL: BACA BAB 1 / SAMPLE PREVIEW -->
+  <div id="previewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
+        <div>
+          <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Sampel Digital</span>
+          <h3 id="modalBookTitle" class="font-serif font-bold text-lg text-slate-900">Judul Buku</h3>
+          <p id="modalBookAuthor" class="text-xs text-slate-500">Penulis</p>
+        </div>
+        <button onclick="closePreviewModal()" class="text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
+      </div>
+      <div class="overflow-y-auto flex-1 pr-2 text-slate-700 text-sm leading-relaxed space-y-4" id="modalSampleContent">
+        <!-- Text sample filled by JS -->
+      </div>
+      <div class="pt-4 border-t border-slate-200 mt-4 flex items-center justify-between">
+        <span class="text-xs text-slate-400">Menampilkan Bab 1 (Pratinjau Gratis)</span>
+        <button id="modalBuyButton" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition">
+          Beli Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART SLIDING DRAWER -->
+  <div id="cartDrawer" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div onclick="toggleCartDrawer()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
+    <!-- Drawer Panel -->
+    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl p-6 flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+          <span>Keranjang Belanja</span>
+          <span id="drawerCartCount" class="text-xs bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded-full">0 item</span>
+        </h3>
+        <button onclick="toggleCartDrawer()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">✕</button>
+      </div>
+
+      <!-- Cart Item List -->
+      <div id="cartItemsList" class="flex-1 overflow-y-auto py-4 divide-y divide-slate-100">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Cart Footer / Summary -->
+      <div class="pt-4 border-t border-slate-200 space-y-3">
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-slate-500">Subtotal:</span>
+          <span id="cartSubtotal" class="font-bold text-slate-900 text-base">Rp 0</span>
+        </div>
+        <p class="text-[11px] text-slate-400">Pajak dan biaya ongkir akan dihitung otomatis saat checkout.</p>
+        <button 
+          id="checkoutBtn" 
+          onclick="openCheckoutModal()" 
+          class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-bold py-3 rounded-xl text-sm transition shadow-md"
+        >
+          Lanjut ke Pembayaran
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL (STRIPE & PAYPAL) -->
+  <div id="checkoutModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
+        <div>
+          <h3 class="font-bold text-xl text-slate-900">Selesaikan Pesanan</h3>
+          <p class="text-xs text-slate-500">Proses transaksi aman & terenkripsi 256-bit.</p>
+        </div>
+        <button onclick="closeCheckoutModal()" class="text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
+      </div>
+
+      <!-- Checkout Form -->
+      <form onsubmit="handlePaymentSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap</label>
+          <input type="text" required placeholder="Ahmad Fauzi" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Email Konfirmasi</label>
+            <input type="email" required placeholder="ahmad@example.com" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor WhatsApp</label>
+            <input type="tel" required placeholder="08123456789" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Pengiriman</label>
+          <textarea required rows="2" placeholder="Jl. Sudirman No. 45, Jakarta Selatan" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+        </div>
+
+        <!-- PAYMENT METHOD TABS -->
+        <div class="pt-2">
+          <label class="block text-xs font-semibold text-slate-700 mb-2">Metode Pembayaran</label>
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <button type="button" onclick="selectPaymentMethod('stripe')" id="tabStripe" class="border-2 border-emerald-600 bg-emerald-50/50 rounded-xl p-3 text-left flex items-center justify-between">
+              <div>
+                <p class="font-bold text-xs text-slate-900">Stripe Card</p>
+                <p class="text-[10px] text-slate-500">Kartu Kredit / Debit</p>
+              </div>
+              <span class="text-sm font-bold text-emerald-600">✓</span>
+            </button>
+            <button type="button" onclick="selectPaymentMethod('paypal')" id="tabPaypal" class="border-2 border-slate-200 hover:border-slate-300 rounded-xl p-3 text-left flex items-center justify-between">
+              <div>
+                <p class="font-bold text-xs text-slate-900">PayPal</p>
+                <p class="text-[10px] text-slate-500">One-Click Checkout</p>
+              </div>
+              <span class="text-sm font-bold text-slate-300">○</span>
+            </button>
+          </div>
+
+          <!-- STRIPE FORM FIELDS -->
+          <div id="stripeFormFields" class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-500">Nomor Kartu (Stripe Mock)</label>
+              <input type="text" placeholder="4242 •••• •••• 4242" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-500">Masa Berlaku</label>
+                <input type="text" placeholder="MM/YY" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs outline-none">
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-500">CVC</label>
+                <input type="text" placeholder="123" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs outline-none">
+              </div>
+            </div>
+          </div>
+
+          <!-- PAYPAL BUTTON PLACEHOLDER -->
+          <div id="paypalFormFields" class="hidden bg-amber-50/60 border border-amber-200 rounded-xl p-4 text-center">
+            <p class="text-xs text-slate-700 mb-2">Anda akan dialihkan ke halaman PayPal Sandbox untuk otorisasi pembayaran.</p>
+            <div class="bg-[#ffc439] hover:bg-[#f4bb34] text-slate-900 font-bold py-2 rounded-lg text-xs cursor-pointer shadow-sm">
+              Bayar dengan PayPal
+            </div>
+          </div>
+        </div>
+
+        <!-- TOTAL & SUBMIT -->
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-400">Total Pembayaran:</span>
+            <p id="checkoutTotalAmount" class="font-bold text-lg text-emerald-700">Rp 0</p>
+          </div>
+          <button type="submit" id="payButton" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition shadow-md">
+            Konfirmasi & Bayar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PAYMENT SUCCESS RECEIPT MODAL -->
+  <div id="successModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl">
+      <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold">
+        ✓
+      </div>
+      <h3 class="font-bold text-lg text-slate-900 mb-1">Pembayaran Berhasil!</h3>
+      <p class="text-xs text-slate-500 mb-4">Pesanan Anda telah dicatat dalam sistem dan inventaris stok telah diperbarui secara otomatis.</p>
+      
+      <div class="bg-slate-50 rounded-xl p-3 text-left text-xs space-y-1 mb-4 border border-slate-200">
+        <div class="flex justify-between"><span class="text-slate-400">ID Pesanan:</span> <span class="font-mono font-bold" id="receiptOrderId">#LB-8921</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Metode:</span> <span class="font-semibold text-slate-700" id="receiptMethod">Stripe Card</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Total:</span> <span class="font-bold text-emerald-600" id="receiptAmount">Rp 0</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Status Stok:</span> <span class="text-emerald-700 font-semibold">Tersinkronisasi 1:1</span></div>
+      </div>
+
+      <button onclick="closeSuccessModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs transition">
+        Kembali Belanja
+      </button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC (INVENTORY, CART, MODALS, SEARCH) -->
+  <script>
+    // 1. DATA MASTER BUKU & INVENTARIS
+    const books = [
+      {
+        id: 1,
+        title: "Filosofi Teras",
+        author: "Henry Manampiring",
+        category: "Self-Help",
+        price: 98000,
+        stock: 8,
+        rating: 4.9,
+        color: "from-amber-700 to-amber-900",
+        sample: "Pernahkah kamu merasa cemas akan masa depan yang belum terjadi? Stoisisme atau Filosofi Teras mengajarkan kita untuk membedakan hal-hal yang berada di bawah kendali kita dan hal-hal yang berada di luar kendali kita. Mengapa kita menghabiskan energi untuk hal yang tak bisa kita kendalikan?"
+      },
+      {
+        id: 2,
+        title: "Bumi Manusia",
+        author: "Pramoedya Ananta Toer",
+        category: "Fiksi",
+        price: 135000,
+        stock: 3, // Low stock indicator
+        rating: 5.0,
+        color: "from-amber-900 to-stone-900",
+        sample: "Sebuah pepatah berbisik, 'Berbahagialah dia yang makan dari keringatnya sendiri, bersenang karena usahanya sendiri, dan maju karena pengalamannya sendiri.' Minke melangkah melewati gedung kolonial dengan tekad pemuda pribumi yang mendobrak zaman."
+      },
+      {
+        id: 3,
+        title: "Atomic Habits",
+        author: "James Clear",
+        category: "Self-Help",
+        price: 120000,
+        stock: 15,
+        rating: 4.9,
+        color: "from-blue-700 to-slate-900",
+        sample: "Perubahan kecil yang tampaknya sepele akan menghasilkan dampak luar biasa jika dilakukan konsisten bertahun-tahun. Jika Anda bisa menjadi 1% lebih baik setiap hari selama satu tahun, Anda akan 37 kali lebih baik saat tahun tersebut berakhir."
+      },
+      {
+        id: 4,
+        title: "Clean Code",
+        author: "Robert C. Martin",
+        category: "Teknologi",
+        price: 245000,
+        stock: 0, // Out of stock example
+        rating: 4.8,
+        color: "from-emerald-800 to-teal-950",
+        sample: "Bahkan kode yang buruk pun bisa berfungsi. Tetapi jika kode itu tidak bersih, ia dapat membuat organisasi pengembang perangkat lunak bertekuk lutut. Menulis kode yang bersih adalah seni yang membutuhkan disiplin tinggi."
+      },
+      {
+        id: 5,
+        title: "The Psychology of Money",
+        author: "Morgan Housel",
+        category: "Bisnis",
+        price: 105000,
+        stock: 6,
+        rating: 4.9,
+        color: "from-slate-700 to-slate-900",
+        sample: "Kesuksesan mengelola uang bukan soal seberapa pintar Anda matematika, melainkan tentang bagaimana perilaku Anda saat memegang uang. Orang pintar sekalipun bisa bangkrut jika tidak mampu mengendalikan emosi dan keserakahannya."
+      },
+      {
+        id: 6,
+        title: "Cantik Itu Luka",
+        author: "Eka Kurniawan",
+        category: "Fiksi",
+        price: 115000,
+        stock: 4,
+        rating: 4.7,
+        color: "from-rose-900 to-stone-900",
+        sample: "Sore hari di akhir pekan itu, Dewi Ayu bangkit dari kuburnya setelah dua puluh satu tahun mati. Kebangkitannya mengejutkan seorang gembala tua yang sedang memerah air susu kambing betina di tepi pemakaman Halimunda."
+      },
+      {
+        id: 7,
+        title: "Designing Data-Intensive Apps",
+        author: "Martin Kleppmann",
+        category: "Teknologi",
+        price: 320000,
+        stock: 5,
+        rating: 4.9,
+        color: "from-indigo-900 to-slate-950",
+        sample: "Data adalah pusat dari sebagian besar tantangan dalam rekayasa perangkat lunak hari ini. Masalah utama bukan lagi keterbatasan CPU, melainkan volume data, kompleksitas relasi data, dan kecepatan perubahan struktur data."
+      },
+      {
+        id: 8,
+        title: "Zero to One",
+        author: "Peter Thiel",
+        category: "Bisnis",
+        price: 95000,
+        stock: 9,
+        rating: 4.6,
+        color: "from-cyan-900 to-blue-950",
+        sample: "Tugas setiap bisnis baru adalah menciptakan sesuatu yang benar-benar baru di dunia, bergerak dari 0 ke 1, bukan sekadar meniru apa yang sudah ada dari 1 ke n. Monopoli kreatif adalah motor kemajuan ekonomi."
+      }
+    ];
+
+    let cart = [];
+    let currentCategory = "Semua";
+    let searchQuery = "";
+    let selectedPayment = "stripe";
+
+    // 2. INITIAL RENDER
+    window.onload = () => {
+      renderBooks();
+      renderInventoryTable();
+    };
+
+    // 3. RENDER BUKU KE GRID
+    function renderBooks() {
+      const grid = document.getElementById('bookGrid');
+      const emptyState = document.getElementById('emptyState');
+      
+      const filtered = books.filter(book => {
+        const matchCategory = currentCategory === "Semua" || book.category === currentCategory;
+        const matchSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            book.author.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchCategory && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = "";
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = filtered.map(book => {
+        const isOutOfStock = book.stock <= 0;
+        const isLowStock = book.stock > 0 && book.stock <= 3;
+
+        let badgeStock = `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Tersedia (${book.stock})</span>`;
+        if (isOutOfStock) {
+          badgeStock = `<span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Stok Habis</span>`;
+        } else if (isLowStock) {
+          badgeStock = `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Sisa ${book.stock} Buku</span>`;
+        }
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl transition-all duration-300 group">
+            <div>
+              <!-- BOOK COVER (ASPECT RATIO 2:3) -->
+              <div class="aspect-[2/3] w-full rounded-xl bg-gradient-to-br ${book.color} p-4 flex flex-col justify-between text-white relative overflow-hidden book-cover-shadow mb-4 group-hover:-translate-y-1 transition duration-300">
+                <div class="flex justify-between items-start">
+                  <span class="text-[9px] uppercase tracking-wider font-semibold opacity-75">${book.category}</span>
+                  <span class="text-xs">⭐ ${book.rating}</span>
+                </div>
+                <div>
+                  <h4 class="font-serif font-bold text-sm leading-snug line-clamp-2">${book.title}</h4>
+                  <p class="text-[10px] text-slate-300 mt-1">${book.author}</p>
+                </div>
+              </div>
+
+              <!-- METADATA -->
+              <div class="mb-2 flex items-center justify-between">
+                ${badgeStock}
+                <span class="text-xs font-bold text-slate-900">Rp ${book.price.toLocaleString('id-ID')}</span>
+              </div>
+              <h3 class="font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-emerald-600 transition">${book.title}</h3>
+              <p class="text-xs text-slate-400 line-clamp-1">${book.author}</p>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-100">
+              <button 
+                onclick="openPreviewModal(${book.id})" 
+                class="text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 py-2 rounded-lg transition"
+              >
+                Baca Bab 1
+              </button>
+              <button 
+                onclick="addToCart(${book.id})" 
+                ${isOutOfStock ? 'disabled' : ''}
+                class="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed py-2 rounded-lg transition flex items-center justify-center gap-1"
+              >
+                ${isOutOfStock ? 'Habis' : '+ Keranjang'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 4. FILTER KATEGORI & PENCARIAN
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        if (btn.innerText.includes(cat) || (cat === "Semua" && btn.innerText === "Semua") || (cat === "Self-Help" && btn.innerText.includes("Pengembangan"))) {
+          btn.className = "cat-pill px-4 py-1.5 text-xs font-semibold rounded-full bg-slate-900 text-white transition";
+        } else {
+          btn.className = "cat-pill px-4 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition";
+        }
+      });
+      renderBooks();
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById('searchInput').value;
+      renderBooks();
+    }
+
+    function handleMobileSearch() {
+      searchQuery = document.getElementById('mobileSearchInput').value;
+      renderBooks();
+    }
+
+    // 5. KERANJANG BELANJA (CART SYSTEM)
+    function addToCart(bookId) {
+      const book = books.find(b => b.id === bookId);
+      if (!book || book.stock <= 0) return;
+
+      const existing = cart.find(item => item.id === bookId);
+      if (existing) {
+        if (existing.qty < book.stock) {
+          existing.qty += 1;
+        } else {
+          alert(`Maksimal pembelian untuk buku ini adalah ${book.stock} buah.`);
+          return;
+        }
+      } else {
+        cart.push({ ...book, qty: 1 });
+      }
+
+      updateCartUI();
+    }
+
+    function updateCartQty(bookId, delta) {
+      const item = cart.find(i => i.id === bookId);
+      const book = books.find(b => b.id === bookId);
+      if (!item) return;
+
+      item.qty += delta;
+      if (item.qty <= 0) {
+        cart = cart.filter(i => i.id !== bookId);
+      } else if (item.qty > book.stock) {
+        item.qty = book.stock;
+        alert(`Sisa stok buku hanya ${book.stock} eksemplar.`);
+      }
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+      document.getElementById('cartCount').innerText = totalCount;
+      document.getElementById('drawerCartCount').innerText = `${totalCount} item`;
+      document.getElementById('cartSubtotal').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
+
+      const listContainer = document.getElementById('cartItemsList');
+      const checkoutBtn = document.getElementById('checkoutBtn');
+
+      if (cart.length === 0) {
+        listContainer.innerHTML = `
+          <div class="text-center py-12 text-slate-400">
+            <p class="text-sm">Keranjang belanja Anda masih kosong.</p>
+          </div>
+        `;
+        checkoutBtn.disabled = true;
+        return;
+      }
+
+      checkoutBtn.disabled = false;
+      listContainer.innerHTML = cart.map(item => `
+        <div class="py-3 flex items-center justify-between gap-3">
+          <div class="flex-1">
+            <h4 class="font-bold text-xs text-slate-800 line-clamp-1">${item.title}</h4>
+            <span class="text-[11px] text-slate-400">Rp ${item.price.toLocaleString('id-ID')} / eks</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="updateCartQty(${item.id}, -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold">-</button>
+            <span class="text-xs font-bold text-slate-700 w-4 text-center">${item.qty}</span>
+            <button onclick="updateCartQty(${item.id}, 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold">+</button>
+          </div>
+          <span class="text-xs font-bold text-emerald-700 w-20 text-right">Rp ${(item.price * item.qty).toLocaleString('id-ID')}</span>
+        </div>
+      `).join('');
+    }
+
+    function toggleCartDrawer() {
+      const drawer = document.getElementById('cartDrawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    // 6. MODAL BACA BAB 1 (SAMPLE DIGITAL PREVIEW)
+    function openPreviewModal(bookId) {
+      const book = books.find(b => b.id === bookId);
+      if (!book) return;
+
+      document.getElementById('modalBookTitle').innerText = book.title;
+      document.getElementById('modalBookAuthor').innerText = `Karya: ${book.author} • Genre: ${book.category}`;
+      document.getElementById('modalSampleContent').innerHTML = `
+        <p class="first-letter:text-3xl first-letter:font-bold first-letter:font-serif first-letter:mr-1">${book.sample}</p>
+        <p class="italic text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-200">
+          "Buku ini mengubah cara pandang kita terhadap nilai kehidupan dan rutinitas harian..." Dapatkan buku utuh dengan membeli secara online sekarang.
+        </p>
+      `;
+
+      const buyBtn = document.getElementById('modalBuyButton');
+      if (book.stock <= 0) {
+        buyBtn.disabled = true;
+        buyBtn.innerText = "Stok Habis";
+        buyBtn.className = "bg-slate-300 text-white px-5 py-2 rounded-xl text-xs font-bold cursor-not-allowed";
+      } else {
+        buyBtn.disabled = false;
+        buyBtn.innerText = `Beli Sekarang (Rp ${book.price.toLocaleString('id-ID')})`;
+        buyBtn.className = "bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition";
+        buyBtn.onclick = () => {
+          addToCart(book.id);
+          closePreviewModal();
+          toggleCartDrawer();
+        };
+      }
+
+      document.getElementById('previewModal').classList.remove('hidden');
+    }
+
+    function closePreviewModal() {
+      document.getElementById('previewModal').classList.add('hidden');
+    }
+
+    // 7. CHECKOUT & SISTEM PEMBAYARAN (STRIPE & PAYPAL)
+    function openCheckoutModal() {
+      toggleCartDrawer();
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      document.getElementById('checkoutTotalAmount').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
+      document.getElementById('checkoutModal').classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById('checkoutModal').classList.add('hidden');
+    }
+
+    function selectPaymentMethod(method) {
+      selectedPayment = method;
+      const stripeTab = document.getElementById('tabStripe');
+      const paypalTab = document.getElementById('tabPaypal');
+      const stripeFields = document.getElementById('stripeFormFields');
+      const paypalFields = document.getElementById('paypalFormFields');
+
+      if (method === 'stripe') {
+        stripeTab.className = "border-2 border-emerald-600 bg-emerald-50/50 rounded-xl p-3 text-left flex items-center justify-between";
+        stripeTab.querySelector('span').innerText = "✓";
+        stripeTab.querySelector('span').className = "text-sm font-bold text-emerald-600";
+
+        paypalTab.className = "border-2 border-slate-200 hover:border-slate-300 rounded-xl p-3 text-left flex items-center justify-between";
+        paypalTab.querySelector('span').innerText = "○";
+        paypalTab.querySelector('span').className = "text-sm font-bold text-slate-300";
+
+        stripeFields.classList.remove('hidden');
+        paypalFields.classList.add('hidden');
+      } else {
+        paypalTab.className = "border-2 border-amber-500 bg-amber-50/50 rounded-xl p-3 text-left flex items-center justify-between";
+        paypalTab.querySelector('span').innerText = "✓";
+        paypalTab.querySelector('span').className = "text-sm font-bold text-amber-600";
+
+        stripeTab.className = "border-2 border-slate-200 hover:border-slate-300 rounded-xl p-3 text-left flex items-center justify-between";
+        stripeTab.querySelector('span').innerText = "○";
+        stripeTab.querySelector('span').className = "text-sm font-bold text-slate-300";
+
+        stripeFields.classList.add('hidden');
+        paypalFields.classList.remove('hidden');
+      }
+    }
+
+    function handlePaymentSubmit(e) {
+      e.preventDefault();
+      const payBtn = document.getElementById('payButton');
+      payBtn.disabled = true;
+      payBtn.innerText = "Memproses Transaksi...";
+
+      // Simulasi delay gateway pembayaran (Stripe / PayPal API handshake)
+      setTimeout(() => {
+        // Kurangi stok inventaris buku secara otomatis
+        cart.forEach(item => {
+          const book = books.find(b => b.id === item.id);
+          if (book) {
+            book.stock = Math.max(0, book.stock - item.qty);
+          }
+        });
+
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        document.getElementById('receiptOrderId').innerText = `#LB-${Math.floor(1000 + Math.random() * 9000)}`;
+        document.getElementById('receiptMethod').innerText = selectedPayment === 'stripe' ? 'Stripe (Kartu Kredit)' : 'PayPal Sandbox';
+        document.getElementById('receiptAmount').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
+
+        // Reset keranjang belanja
+        cart = [];
+        updateCartUI();
+        renderBooks();
+        renderInventoryTable();
+
+        payBtn.disabled = false;
+        payBtn.innerText = "Konfirmasi & Bayar";
+        closeCheckoutModal();
+        document.getElementById('successModal').classList.remove('hidden');
+      }, 1000);
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('successModal').classList.add('hidden');
+    }
+
+    // 8. PANEL KELOLA INVENTARIS TOKO (ADMIN MODE)
+    function toggleAdminPanel() {
+      const panel = document.getElementById('adminSection');
+      panel.classList.toggle('hidden');
+      if (!panel.classList.contains('hidden')) {
+        panel.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function updateStock(bookId, delta) {
+      const book = books.find(b => b.id === bookId);
+      if (book) {
+        book.stock = Math.max(0, book.stock + delta);
+        renderBooks();
+        renderInventoryTable();
+      }
+    }
+
+    function renderInventoryTable() {
+      const tbody = document.getElementById('inventoryTableBody');
+      tbody.innerHTML = books.map(book => {
+        let statusBadge = `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">Tersedia</span>`;
+        if (book.stock === 0) {
+          statusBadge = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-semibold">Habis (Restock Diperlukan)</span>`;
+        } else if (book.stock <= 3) {
+          statusBadge = `<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold">Menipis</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-2.5 px-3 font-semibold text-slate-800">${book.title}</td>
+            <td class="py-2.5 px-3 text-slate-500">${book.category}</td>
+            <td class="py-2.5 px-3 font-mono">Rp ${book.price.toLocaleString('id-ID')}</td>
+            <td class="py-2.5 px-3 font-bold ${book.stock <= 3 ? 'text-amber-600' : 'text-slate-800'}">${book.stock} eks</td>
+            <td class="py-2.5 px-3">${statusBadge}</td>
+            <td class="py-2.5 px-3 text-right space-x-1">
+              <button onclick="updateStock(${book.id}, -1)" class="bg-slate-200 hover:bg-slate-300 px-2 py-1 rounded font-bold text-slate-700">-1</button>
+              <button onclick="updateStock(${book.id}, 1)" class="bg-slate-200 hover:bg-slate-300 px-2 py-1 rounded font-bold text-slate-700">+1</button>
+              <button onclick="updateStock(${book.id}, 5)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2 py-1 rounded font-bold">+5 Restock</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>
